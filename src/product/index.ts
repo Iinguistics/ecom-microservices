@@ -14,7 +14,7 @@ export async function main(
 		switch (httpMethod) {
 			case 'GET':
 				if (event.queryStringParameters) {
-					body = await getProductsByCategory(event); // GET product/1234?category=Phone
+					body = await ProductTable.getProductsByCategory(event); // GET product/1234?category=Phone
 				} else if (event.pathParameters?.id) {
 					body = await ProductTable.getProduct(event.pathParameters.id); // GET product/{id}
 				} else {
@@ -22,10 +22,10 @@ export async function main(
 				}
 				break;
 			case 'POST':
-				body = await createProduct(event); // POST /product
+				body = await ProductTable.createProduct(event); // POST /product
 				break;
 			case 'DELETE':
-				body = await deleteProduct(event.pathParameters?.id); // DELETE /product/{id}
+				body = await ProductTable.deleteProduct(event.pathParameters?.id); // DELETE /product/{id}
 				break;
 			case 'PUT':
 				body = await ProductTable.updateProduct(event); // PUT /product/{id}

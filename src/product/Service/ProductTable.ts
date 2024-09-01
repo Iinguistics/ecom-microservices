@@ -1,6 +1,7 @@
 import { APIGatewayProxyEventV2 } from 'aws-lambda';
 import {
 	DeleteItemCommand,
+	DeleteItemCommandOutput,
 	GetItemCommand,
 	PutItemCommand,
 	UpdateItemCommand,
@@ -108,7 +109,9 @@ class ProductTable {
 		}
 	}
 
-	async deleteProduct(productId: string | undefined) {
+	async deleteProduct(
+		productId: string | undefined
+	): Promise<DeleteItemCommandOutput | CatchError> {
 		if (!productId) {
 			throw new Error(`Invalid request, missing product id`);
 		}
@@ -124,6 +127,39 @@ class ProductTable {
 			const deleteResult = await ddbClient.send(new DeleteItemCommand(params));
 
 			return deleteResult;
+		} catch (e) {
+			return handleError(e);
+		}
+	}
+
+	async getProductsByCategory(
+		event: APIGatewayProxyEventV2
+	): Promise<CatchError | Product[]> {
+		if (!event.pathParameters?.id) {
+			throw new Error(`Invalid request, missing product id`);
+		}
+
+		if (!event.queryStringParameters?.category) {
+			throw new Error(`Invalid request, missing product category`);
+		}
+
+		console.log('fetching products by category');
+
+		try {
+			const category = event.queryStringParameters.category;
+
+			const params = {
+				KeyConditionExpression: 'id = :productId',
+				FilterExpression: 'contains (category, :category)',
+				ExpressionAttributeValues: {
+					':category': { S: category },
+				},
+				TableName: process.env.DYNAMODB_TABLE_NAME,
+			};
+
+			const data = await ddbClient.send(new QueryCommand(params));
+
+			return (data.Items?.map((item) => unmarshall(item)) as Product[]) || [];
 		} catch (e) {
 			return handleError(e);
 		}
