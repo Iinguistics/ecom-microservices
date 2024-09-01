@@ -1,4 +1,13 @@
 import { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from 'aws-lambda';
+import {
+	DeleteItemCommand,
+	GetItemCommand,
+	PutItemCommand,
+	UpdateItemCommand,
+	QueryCommand,
+	ScanCommand,
+} from '@aws-sdk/client-dynamodb';
+import { ddbClient } from './ddbClient';
 
 export async function main(
 	event: APIGatewayProxyEventV2
