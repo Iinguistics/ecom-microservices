@@ -1,6 +1,6 @@
 import { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from 'aws-lambda';
 import { handleError } from '../utils/handleError';
-import ProductTable  from './Service/ProductTable'
+import ProductTable from './Service/ProductTable';
 
 export async function main(
 	event: APIGatewayProxyEventV2
@@ -18,7 +18,7 @@ export async function main(
 				} else if (event.pathParameters?.id) {
 					body = await ProductTable.getProduct(event.pathParameters.id); // GET product/{id}
 				} else {
-					body = await ProductTable.getAllProducts() // GET products
+					body = await ProductTable.getAllProducts(); // GET products
 				}
 				break;
 			case 'POST':
@@ -39,7 +39,7 @@ export async function main(
 			statusCode: 200,
 			body: JSON.stringify({
 				message: `Successfully finished operation: "${httpMethod}"`,
-				body: body,
+				body,
 			}),
 		};
 	} catch (error: unknown) {
