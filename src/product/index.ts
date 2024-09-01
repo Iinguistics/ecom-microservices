@@ -1,6 +1,9 @@
-import { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from 'aws-lambda';
-import { handleError } from '../utils/handleError';
-import ProductTable from './Service/ProductTable';
+import type {
+	APIGatewayProxyEventV2,
+	APIGatewayProxyResultV2,
+} from 'aws-lambda';
+const handleError = require('../utils/handleError');
+const ProductTable = require('./Service/ProductTable');
 
 export async function main(
 	event: APIGatewayProxyEventV2

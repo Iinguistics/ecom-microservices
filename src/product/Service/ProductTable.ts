@@ -1,20 +1,25 @@
-import { APIGatewayProxyEventV2 } from 'aws-lambda';
-import {
-	DeleteItemCommand,
+import type { APIGatewayProxyEventV2 } from 'aws-lambda';
+import type {
 	DeleteItemCommandOutput,
+	ScanCommandOutput,
+	UpdateItemCommandOutput,
+	QueryCommandOutput,
+} from '@aws-sdk/client-dynamodb';
+import type CatchError from '../../utils/CatchError';
+import type Product from './Product';
+
+const {
+	DeleteItemCommand,
 	GetItemCommand,
 	PutItemCommand,
 	UpdateItemCommand,
-	UpdateItemCommandOutput,
 	QueryCommand,
 	ScanCommand,
-} from '@aws-sdk/client-dynamodb';
-import { ddbClient } from './ddbClient';
-import { marshall, unmarshall } from '@aws-sdk/util-dynamodb';
-import { v4 as uuidv4 } from 'uuid';
-import { handleError } from '../../utils/handleError';
-import CatchError from '../../utils/CatchError';
-import Product from './Product';
+} = require('@aws-sdk/client-dynamodb');
+const { ddbClient } = require('./ddbClient');
+const { marshall, unmarshall } = require('@aws-sdk/util-dynamodb');
+const { v4: uuidv4 } = require('uuid');
+const handleError = require('../../utils/handleError');
 
 class ProductTable {
 	async getAllProducts(): Promise<Product[] | CatchError> {
@@ -24,7 +29,9 @@ class ProductTable {
 				TableName: process.env.DYNAMODB_TABLE_NAME!,
 			};
 
-			const data = await ddbClient.send(new ScanCommand(params));
+			const data: ScanCommandOutput = await ddbClient.send(
+				new ScanCommand(params)
+			);
 
 			return (data.Items?.map((item) => unmarshall(item)) as Product[]) || [];
 		} catch (e) {
@@ -157,7 +164,9 @@ class ProductTable {
 				TableName: process.env.DYNAMODB_TABLE_NAME,
 			};
 
-			const data = await ddbClient.send(new QueryCommand(params));
+			const data: QueryCommandOutput = await ddbClient.send(
+				new QueryCommand(params)
+			);
 
 			return (data.Items?.map((item) => unmarshall(item)) as Product[]) || [];
 		} catch (e) {
@@ -196,4 +205,4 @@ class ProductTable {
 	}
 }
 
-export default new ProductTable();
+module.exports = new ProductTable();
