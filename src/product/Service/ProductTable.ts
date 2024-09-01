@@ -27,6 +27,24 @@ class ProductTable {
 			throw e;
 		}
 	}
+
+	async getProduct(productId: string): Promise<Product | {}> {
+		console.log(`fetching product id: ${productId}`);
+
+		try {
+			const params = {
+				TableName: process.env.DYNAMODB_TABLE_NAME,
+				Key: marshall({ id: productId }),
+			};
+
+			const { Item } = await ddbClient.send(new GetItemCommand(params));
+
+			return Item ? (unmarshall(Item) as Product) : {};
+		} catch (e) {
+			console.error(e);
+			throw e;
+		}
+	}
 }
 
 export default new ProductTable();

@@ -12,10 +12,10 @@ export async function main(
 	try {
 		switch (httpMethod) {
 			case 'GET':
-				if (event.queryStringParameters != null) {
+				if (event.queryStringParameters) {
 					body = await getProductsByCategory(event); // GET product/1234?category=Phone
-				} else if (event.pathParameters != null) {
-					body = await getProduct(event.pathParameters.id); // GET product/{id}
+				} else if (event.pathParameters?.id) {
+					body = await ProductTable.getProduct(event.pathParameters.id); // GET product/{id}
 				} else {
 					body = await ProductTable.getAllProducts() // GET products
 				}
