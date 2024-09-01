@@ -108,6 +108,27 @@ class ProductTable {
 		}
 	}
 
+	async deleteProduct(productId: string | undefined) {
+		if (!productId) {
+			throw new Error(`Invalid request, missing product id`);
+		}
+
+		console.log(`deleting product. ID: "${productId}"`);
+
+		try {
+			const params = {
+				TableName: process.env.DYNAMODB_TABLE_NAME,
+				Key: marshall({ id: productId }),
+			};
+
+			const deleteResult = await ddbClient.send(new DeleteItemCommand(params));
+
+			return deleteResult;
+		} catch (e) {
+			return handleError(e);
+		}
+	}
+
 	private buildUpdateParams(
 		id: string,
 		requestBody: Record<string, any>,
