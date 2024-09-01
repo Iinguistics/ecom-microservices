@@ -1,18 +1,22 @@
+import { APIGatewayProxyEventV2 } from 'aws-lambda';
 import {
 	DeleteItemCommand,
 	GetItemCommand,
 	PutItemCommand,
 	UpdateItemCommand,
+	UpdateItemCommandOutput,
 	QueryCommand,
 	ScanCommand,
 } from '@aws-sdk/client-dynamodb';
 import { ddbClient } from './ddbClient';
 import { marshall, unmarshall } from '@aws-sdk/util-dynamodb';
 import { v4 as uuidv4 } from 'uuid';
+import { handleError } from '../../utils/handleError';
+import CatchError from '../../utils/CatchError';
 import Product from './Product';
 
 class ProductTable {
-	async getAllProducts(): Promise<Product[]> {
+	async getAllProducts(): Promise<Product[] | CatchError> {
 		console.log('fetching all products');
 		try {
 			const params = {
@@ -23,12 +27,11 @@ class ProductTable {
 
 			return (data.Items?.map((item) => unmarshall(item)) as Product[]) || [];
 		} catch (e) {
-			console.error(e);
-			throw e;
+			return handleError(e);
 		}
 	}
 
-	async getProduct(productId: string): Promise<Product | {}> {
+	async getProduct(productId: string): Promise<Product | {} | CatchError> {
 		console.log(`fetching product id: ${productId}`);
 
 		try {
@@ -41,9 +44,70 @@ class ProductTable {
 
 			return Item ? (unmarshall(Item) as Product) : {};
 		} catch (e) {
-			console.error(e);
-			throw e;
+			return handleError(e);
 		}
+	}
+
+	async updateProduct(
+		event: APIGatewayProxyEventV2
+	): Promise<UpdateItemCommandOutput | CatchError> {
+		try {
+			if (!event.pathParameters?.id) {
+				throw new Error(`Invalid request, missing product id`);
+			}
+
+			if (!event.body) {
+				throw new Error(`Invalid request, missing event body`);
+			}
+
+			console.log(`updating product with id: "${event.pathParameters.id}"`);
+
+			const requestBody = JSON.parse(event.body);
+			const objKeys = Object.keys(requestBody);
+
+			if (!objKeys.length) {
+				throw new Error('Invalid request: Request body is empty');
+			}
+
+			const params = this.buildUpdateParams(event.pathParameters.id, requestBody, objKeys);
+
+			const updateResult = await ddbClient.send(new UpdateItemCommand(params));
+
+			return updateResult;
+		} catch (e) {
+			console.error(e);
+			return handleError(e);
+		}
+	}
+
+	private buildUpdateParams(
+		id: string,
+		requestBody: Record<string, any>,
+		objKeys: string[]
+	) {
+		return {
+			TableName: process.env.DYNAMODB_TABLE_NAME!,
+			Key: marshall({ id }),
+			UpdateExpression: `SET ${objKeys
+				.map((_, index) => `#key${index} = :value${index}`)
+				.join(', ')}`,
+			ExpressionAttributeNames: objKeys.reduce(
+				(acc, key, index) => ({
+					...acc,
+					[`#key${index}`]: key,
+				}),
+				{}
+			),
+			ExpressionAttributeValues: marshall(
+				objKeys.reduce(
+					(acc, key, index) => ({
+						...acc,
+						[`:value${index}`]: requestBody[key],
+					}),
+					{}
+				)
+			),
+		};
 	}
 }
 

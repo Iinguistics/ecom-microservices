@@ -1,4 +1,5 @@
 import { APIGatewayProxyEventV2, APIGatewayProxyResultV2 } from 'aws-lambda';
+import { handleError } from '../utils/handleError';
 import ProductTable  from './Service/ProductTable'
 
 export async function main(
@@ -27,7 +28,7 @@ export async function main(
 				body = await deleteProduct(event.pathParameters?.id); // DELETE /product/{id}
 				break;
 			case 'PUT':
-				body = await updateProduct(event); // PUT /product/{id}
+				body = await ProductTable.updateProduct(event); // PUT /product/{id}
 				break;
 			default:
 				throw new Error(`Unsupported route: "${httpMethod}"`);
@@ -44,21 +45,6 @@ export async function main(
 	} catch (error: unknown) {
 		console.error(error);
 
-		let errorMsg = 'Unknown error';
-		let errorStack = '';
-
-		if (error instanceof Error) {
-			errorMsg = error.message;
-			errorStack = error.stack || errorStack;
-		}
-
-		return {
-			statusCode: 500,
-			body: JSON.stringify({
-				message: 'Failed to perform operation.',
-				errorMsg,
-				errorStack,
-			}),
-		};
+		return handleError(error);
 	}
 }
