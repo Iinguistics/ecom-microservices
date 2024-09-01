@@ -1,16 +1,13 @@
-import type {
-	APIGatewayProxyEventV2,
-	APIGatewayProxyResultV2,
-} from 'aws-lambda';
+import type { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
 const handleError = require('../utils/handleError');
 const ProductTable = require('./Service/ProductTable');
 
 export async function main(
-	event: APIGatewayProxyEventV2
-): Promise<APIGatewayProxyResultV2> {
+	event: APIGatewayProxyEvent
+): Promise<APIGatewayProxyResult> {
 	console.log('request:', JSON.stringify(event, undefined, 2));
 
-	const httpMethod = event.requestContext.http.method;
+	const httpMethod = event.httpMethod;
 	let body;
 
 	try {
