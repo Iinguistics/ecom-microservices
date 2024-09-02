@@ -21,7 +21,33 @@ export class Microservices extends Construct {
 		super(scope, id);
 
 		this.externalModules = ['aws-sdk'];
+		this.basketMicroservice = this.createBasketFunction(props.basketTable);
 		this.productMicroservice = this.createProductFunction(props.productTable);
+	}
+
+	private createBasketFunction(basketTable: ITable): NodejsFunction {
+		const basketFunctionProps: NodejsFunctionProps = {
+			bundling: {
+				externalModules: this.externalModules,
+			},
+			environment: {
+				PRIMARY_KEY: 'userName',
+				DYNAMODB_TABLE_NAME: basketTable.tableName,
+				EVENT_SOURCE: 'com.ecom.basket.checkoutbasket',
+				EVENT_DETAIL_TYPE: 'CheckoutBasket',
+				EVENT_BUS_NAME: 'EventBus',
+			},
+			handler: 'main',
+			runtime: Runtime.NODEJS_18_X,
+		};
+
+		const basketFunction = new NodejsFunction(this, 'basketLambdaFunction', {
+			entry: join(__dirname, `/../src/basket/index.ts`),
+			...basketFunctionProps,
+		});
+
+		basketTable.grantReadWriteData(basketFunction);
+		return basketFunction;
 	}
 
 	private createProductFunction(productTable: ITable): NodejsFunction {
