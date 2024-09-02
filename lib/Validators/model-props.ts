@@ -13,9 +13,12 @@ export const getBasketProps = (restApi: LambdaRestApi): ModelProps => {
 		schema: {
 			schema: JsonSchemaVersion.DRAFT4,
 			type: JsonSchemaType.OBJECT,
-			required: ['userName'],
+			required: ['userName', 'total', 'email', 'paymentMethod'],
 			properties: {
 				userName: { type: JsonSchemaType.STRING },
+				total: { type: JsonSchemaType.NUMBER },
+				email: { type: JsonSchemaType.STRING },
+				paymentMethod: { type: JsonSchemaType.STRING },
 			},
 		},
 	};

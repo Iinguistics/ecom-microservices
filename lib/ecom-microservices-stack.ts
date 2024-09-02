@@ -16,6 +16,7 @@ export class EcomMicroservicesStack extends cdk.Stack {
 		});
 
 		const apigateway = new ApiGateway(this, 'ApiGateway', {
+      basketMicroservice: microservices.basketMicroservice,
 			productMicroservice: microservices.productMicroservice,
 		});
 	}
