@@ -8,12 +8,27 @@ import {
 } from 'aws-cdk-lib/aws-dynamodb';
 
 export class Database extends Construct {
+	public readonly basketTable: ITable;
 	public readonly productTable: ITable;
 
 	constructor(scope: Construct, id: string) {
 		super(scope, id);
 
+		this.basketTable = this.createBasketTable();
 		this.productTable = this.createProductTable();
+	}
+
+	private createBasketTable(): ITable {
+		const basketTable = new Table(this, 'basket', {
+			partitionKey: {
+				name: 'userName',
+				type: AttributeType.STRING,
+			},
+			tableName: 'basket',
+			removalPolicy: RemovalPolicy.DESTROY,
+			billingMode: BillingMode.PAY_PER_REQUEST,
+		});
+		return basketTable;
 	}
 
 	private createProductTable(): ITable {

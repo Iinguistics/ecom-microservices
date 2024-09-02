@@ -8,11 +8,13 @@ import { Construct } from 'constructs';
 import { join } from 'path';
 
 interface MicroservicesProps {
+	basketTable: ITable;
 	productTable: ITable;
 }
 
 export class Microservices extends Construct {
 	private readonly externalModules: string[];
+	public readonly basketMicroservice: NodejsFunction;
 	public readonly productMicroservice: NodejsFunction;
 
 	constructor(scope: Construct, id: string, props: MicroservicesProps) {
