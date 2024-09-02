@@ -7,9 +7,10 @@ import {
 } from 'aws-cdk-lib/aws-apigateway';
 import { Construct } from 'constructs';
 import { IFunction } from 'aws-cdk-lib/aws-lambda';
-import { getProductProps } from './Validators/model-props';
+import { getBasketProps, getProductProps } from './Validators/model-props';
 
 interface ApiGatewayProps {
+	basketMicroservice: IFunction;
 	productMicroservice: IFunction;
 }
 
@@ -17,7 +18,50 @@ export class ApiGateway extends Construct {
 	constructor(scope: Construct, id: string, props: ApiGatewayProps) {
 		super(scope, id);
 
+		this.createBasketApi(props.basketMicroservice);
 		this.createProductApi(props.productMicroservice);
+	}
+
+	private createBasketApi(basketMicroservice: IFunction) {
+		const restApi = new LambdaRestApi(this, 'basketApi', {
+			restApiName: 'Basket Service',
+			handler: basketMicroservice,
+			proxy: false,
+		});
+
+		const basketModel = new Model(
+			this,
+			'BasketModel',
+			getBasketProps(restApi)
+		);
+
+		const requestValidator = new RequestValidator(this, 'RequestValidator', {
+			restApi,
+			validateRequestBody: true,
+			validateRequestParameters: false,
+		});
+
+		const methodOptions: MethodOptions = {
+			requestModels: {
+				'application/json': basketModel,
+			},
+			requestValidator,
+		};
+
+		const basket = restApi.root.addResource('basket');
+		basket.addMethod('GET'); // GET /basket
+		basket.addMethod('POST'); // POST /basket
+
+		const singleBasket = basket.addResource('{userName}');
+		singleBasket.addMethod('GET'); // GET /basket/{userName}
+		singleBasket.addMethod('DELETE'); // DELETE /basket/{userName}
+
+		const basketCheckout = basket.addResource('checkout');
+		basketCheckout.addMethod(
+			'POST',
+			new LambdaIntegration(basketMicroservice),
+			methodOptions
+		); // POST /basket/checkout
 	}
 
 	private createProductApi(productMicroservice: IFunction) {
