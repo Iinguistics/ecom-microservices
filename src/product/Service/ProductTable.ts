@@ -1,4 +1,4 @@
-import type { APIGatewayProxyEventV2 } from 'aws-lambda';
+import type { APIGatewayProxyEvent } from 'aws-lambda';
 import type {
 	DeleteItemCommandOutput,
 	ScanCommandOutput,
@@ -57,7 +57,7 @@ class ProductTable {
 	}
 
 	async updateProduct(
-		event: APIGatewayProxyEventV2
+		event: APIGatewayProxyEvent
 	): Promise<UpdateItemCommandOutput | CatchError> {
 		try {
 			if (!event.pathParameters?.id) {
@@ -92,7 +92,7 @@ class ProductTable {
 		}
 	}
 
-	async createProduct(event: APIGatewayProxyEventV2) {
+	async createProduct(event: APIGatewayProxyEvent) {
 		if (!event.body) {
 			throw new Error(`Invalid request, missing event body`);
 		}
@@ -139,7 +139,7 @@ class ProductTable {
 	}
 
 	async getProductsByCategory(
-		event: APIGatewayProxyEventV2
+		event: APIGatewayProxyEvent
 	): Promise<CatchError | Product[]> {
 		if (!event.pathParameters?.id) {
 			throw new Error(`Invalid request, missing product id`);
