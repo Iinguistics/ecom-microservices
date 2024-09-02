@@ -13,12 +13,11 @@ export const getBasketProps = (restApi: LambdaRestApi): ModelProps => {
 		schema: {
 			schema: JsonSchemaVersion.DRAFT4,
 			type: JsonSchemaType.OBJECT,
-			required: ['userName', 'total', 'email', 'paymentMethod'],
+			required: ['userName', 'paymentMethod', 'items'],
 			properties: {
 				userName: { type: JsonSchemaType.STRING },
-				total: { type: JsonSchemaType.NUMBER },
-				email: { type: JsonSchemaType.STRING },
 				paymentMethod: { type: JsonSchemaType.STRING },
+				items: { type: JsonSchemaType.ARRAY },
 			},
 		},
 	};
@@ -32,7 +31,12 @@ export const getProductProps = (restApi: LambdaRestApi): ModelProps => {
 		schema: {
 			schema: JsonSchemaVersion.DRAFT4,
 			type: JsonSchemaType.OBJECT,
-			required: ['category', 'description', 'name', 'price'],
+			required: [
+				'category',
+				'description',
+				'name',
+				'price',
+			],
 			properties: {
 				category: { type: JsonSchemaType.STRING },
 				description: { type: JsonSchemaType.STRING },

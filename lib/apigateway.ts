@@ -29,17 +29,16 @@ export class ApiGateway extends Construct {
 			proxy: false,
 		});
 
-		const basketModel = new Model(
-			this,
-			'BasketModel',
-			getBasketProps(restApi)
-		);
+		const basketModel = new Model(this, 'BasketModel', getBasketProps(restApi));
 
-		const requestValidator = new RequestValidator(this, 'RequestValidator', {
-			restApi,
-			validateRequestBody: true,
-			validateRequestParameters: false,
-		});
+		const requestValidator = new RequestValidator(
+			this,
+			'BasketRequestValidator',
+			{
+				restApi,
+				validateRequestBody: true,
+			}
+		);
 
 		const methodOptions: MethodOptions = {
 			requestModels: {
@@ -50,18 +49,18 @@ export class ApiGateway extends Construct {
 
 		const basket = restApi.root.addResource('basket');
 		basket.addMethod('GET'); // GET /basket
-		basket.addMethod('POST'); // POST /basket
+		basket.addMethod(
+			'POST',
+			new LambdaIntegration(basketMicroservice),
+			methodOptions
+		); // POST /basket
 
 		const singleBasket = basket.addResource('{userName}');
 		singleBasket.addMethod('GET'); // GET /basket/{userName}
 		singleBasket.addMethod('DELETE'); // DELETE /basket/{userName}
 
 		const basketCheckout = basket.addResource('checkout');
-		basketCheckout.addMethod(
-			'POST',
-			new LambdaIntegration(basketMicroservice),
-			methodOptions
-		); // POST /basket/checkout
+		basketCheckout.addMethod('POST'); // POST /basket/checkout
 	}
 
 	private createProductApi(productMicroservice: IFunction) {
@@ -77,11 +76,14 @@ export class ApiGateway extends Construct {
 			getProductProps(restApi)
 		);
 
-		const requestValidator = new RequestValidator(this, 'RequestValidator', {
-			restApi,
-			validateRequestBody: true,
-			validateRequestParameters: false,
-		});
+		const requestValidator = new RequestValidator(
+			this,
+			'ProductRequestValidator',
+			{
+				restApi,
+				validateRequestBody: true,
+			}
+		);
 
 		const methodOptions: MethodOptions = {
 			requestModels: {
