@@ -92,7 +92,6 @@ class ProductTable {
 		}
 	}
 
-	// TODO: check for body fields / validation
 	async createProduct(event: APIGatewayProxyEventV2) {
 		if (!event.body) {
 			throw new Error(`Invalid request, missing event body`);
