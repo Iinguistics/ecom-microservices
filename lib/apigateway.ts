@@ -12,6 +12,7 @@ import { getBasketProps, getProductProps } from './Validators/model-props';
 interface ApiGatewayProps {
 	basketMicroservice: IFunction;
 	productMicroservice: IFunction;
+	orderMicroservice: IFunction
 }
 
 export class ApiGateway extends Construct {
@@ -20,6 +21,7 @@ export class ApiGateway extends Construct {
 
 		this.createBasketApi(props.basketMicroservice);
 		this.createProductApi(props.productMicroservice);
+		this.createOrderApi(props.orderMicroservice);
 	}
 
 	private createBasketApi(basketMicroservice: IFunction) {
@@ -108,5 +110,19 @@ export class ApiGateway extends Construct {
 			methodOptions
 		); // PUT /product/{id}
 		singleProduct.addMethod('DELETE'); // DELETE /product/{id}
+	}
+
+	private createOrderApi(orderMicroservice: IFunction) {
+		const restApi = new LambdaRestApi(this, 'orderApi', {
+			restApiName: 'Order Service',
+			handler: orderMicroservice,
+			proxy: false,
+		});
+
+		const order = restApi.root.addResource('order');
+		order.addMethod('GET'); // GET /order
+
+		const singleOrder = order.addResource('{userName}');
+		singleOrder.addMethod('GET'); // GET /order/{userName}
 	}
 }
