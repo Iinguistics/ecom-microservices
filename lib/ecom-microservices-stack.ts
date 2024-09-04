@@ -13,11 +13,13 @@ export class EcomMicroservicesStack extends cdk.Stack {
 		const microservices = new Microservices(this, 'Microservices', {
       basketTable: database.basketTable,
 			productTable: database.productTable,
+      orderTable: database.orderTable,
 		});
 
 		const apigateway = new ApiGateway(this, 'ApiGateway', {
       basketMicroservice: microservices.basketMicroservice,
 			productMicroservice: microservices.productMicroservice,
+      orderMicroservice: microservices.orderMicroservice,
 		});
 	}
 }
