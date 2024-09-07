@@ -5,7 +5,7 @@ import { Construct } from 'constructs';
 import ebOptions from './config/eb';
 
 interface EventBusProps {
-	targetQueue: IQueue;
+	orderQueue: IQueue;
 }
 
 export class EventBus extends Construct {
@@ -27,6 +27,6 @@ export class EventBus extends Construct {
 			ruleName: ebOptions.checkout.ruleName,
 		});
 
-		checkoutBasketRule.addTarget(new SqsQueue(props.targetQueue));
+		checkoutBasketRule.addTarget(new SqsQueue(props.orderQueue));
 	}
 }
