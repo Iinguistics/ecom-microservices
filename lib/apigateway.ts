@@ -7,7 +7,7 @@ import {
 } from 'aws-cdk-lib/aws-apigateway';
 import { Construct } from 'constructs';
 import { IFunction } from 'aws-cdk-lib/aws-lambda';
-import { getBasketProps, getProductProps } from './Validators/model-props';
+import { getBasketProps, getProductProps } from './validators/model-props';
 
 interface ApiGatewayProps {
 	basketMicroservice: IFunction;

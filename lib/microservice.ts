@@ -6,6 +6,7 @@ import {
 } from 'aws-cdk-lib/aws-lambda-nodejs';
 import { Construct } from 'constructs';
 import { join } from 'path';
+import ebOptions from './config/eb';
 
 interface MicroservicesProps {
 	basketTable: ITable;
@@ -36,8 +37,8 @@ export class Microservices extends Construct {
 			environment: {
 				PRIMARY_KEY: 'userName',
 				DYNAMODB_TABLE_NAME: basketTable.tableName,
-				EVENT_SOURCE: 'com.ecom.basket.checkoutbasket',
-				EVENT_DETAIL_TYPE: 'CheckoutBasket',
+				EVENT_SOURCE: ebOptions.checkout.source,
+				EVENT_DETAIL_TYPE: ebOptions.checkout.detailType,
 				EVENT_BUS_NAME: 'EventBus',
 			},
 			handler: 'main',
